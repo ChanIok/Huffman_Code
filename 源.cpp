@@ -7,31 +7,31 @@
 using namespace std;
 #define MaxSize 512
 
-struct HuffNode//¹ş·òÂüÊ÷µÄ½áµã½á¹¹
+struct HuffNode//å“ˆå¤«æ›¼æ ‘çš„ç»“ç‚¹ç»“æ„
 {
-	unsigned char  byte;      //½áµãÊı¾İ
-	long long weight;	  //È¨Öµ
-	HuffNode* parent; //Ë«Ç×½áµãÖ¸Õë
-	HuffNode* leftChild; //×óº¢×ÓÖ¸Õë
-	HuffNode* rightChild; //ÓÒº¢×ÓÖ¸Õë
-	string code;  //¹ş·òÂü±àÂë
-	int code_len;    //±àÂë³¤¶È 
+	unsigned char  byte;      //ç»“ç‚¹æ•°æ®
+	long long weight;	  //æƒå€¼
+	HuffNode* parent; //åŒäº²ç»“ç‚¹æŒ‡é’ˆ
+	HuffNode* leftChild; //å·¦å­©å­æŒ‡é’ˆ
+	HuffNode* rightChild; //å³å­©å­æŒ‡é’ˆ
+	string code;  //å“ˆå¤«æ›¼ç¼–ç 
+	int code_len;    //ç¼–ç é•¿åº¦ 
 };
 
-int all_bytes_count = 0, bytes_count = 0, nodes_count = 0;//×Ü×Ö½ÚÊı£¬×Ö½ÚÀàÊı£¬½áµã×ÜÊı
-HuffNode HuffTree[MaxSize], *Treeroot;//¹ş·òÂüÊ÷Ê÷£¬¸ù½áµã
-string Compress_filename, Compress_suffix;//Ñ¹ËõÎÄ¼şÃû£¬ºó×º
-string Decompress_filename, Decompress_suffix;//½âÑ¹ÎÄ¼şÃû£¬ºó×º
+int all_bytes_count = 0, bytes_count = 0, nodes_count = 0;//æ€»å­—èŠ‚æ•°ï¼Œå­—èŠ‚ç±»æ•°ï¼Œç»“ç‚¹æ€»æ•°
+HuffNode HuffTree[MaxSize], *Treeroot;//å“ˆå¤«æ›¼æ ‘æ ‘ï¼Œæ ¹ç»“ç‚¹
+string Compress_filename, Compress_suffix;//å‹ç¼©æ–‡ä»¶åï¼Œåç¼€
+string Decompress_filename, Decompress_suffix;//è§£å‹æ–‡ä»¶åï¼Œåç¼€
 
-void InitHuffTree();//¹ş·òÂüÊ÷³õÊ¼»¯
-void Statistics();//¸÷×Ö½ÚÈ¨ÖµÍ³¼Æ
-void CreatHuffTree();//¹¹Ôì¹ş·òÂüÊ÷
-void CreatHuffCode(HuffNode *pre);//¹¹Ôì¹ş·òÂü±àÂë£¬µİ¹é
-void Compress();//Éú³ÉÑ¹ËõÎÄ¼ş
-void Decompress();//½âÑ¹Ñ¹ËõÎÄ¼ş
-void Callwindow();//¶Ô»°´°¿Ú
+void InitHuffTree();//å“ˆå¤«æ›¼æ ‘åˆå§‹åŒ–
+void Statistics();//å„å­—èŠ‚æƒå€¼ç»Ÿè®¡
+void CreatHuffTree();//æ„é€ å“ˆå¤«æ›¼æ ‘
+void CreatHuffCode(HuffNode *pre);//æ„é€ å“ˆå¤«æ›¼ç¼–ç ï¼Œé€’å½’
+void Compress();//ç”Ÿæˆå‹ç¼©æ–‡ä»¶
+void Decompress();//è§£å‹å‹ç¼©æ–‡ä»¶
+void Callwindow();//å¯¹è¯çª—å£
 
-void InitHuffTree()//¹ş·òÂüÊ÷³õÊ¼»¯
+void InitHuffTree()//å“ˆå¤«æ›¼æ ‘åˆå§‹åŒ–
 {
 	for (int i = 0; i < MaxSize; i++)
 	{
@@ -43,43 +43,43 @@ void InitHuffTree()//¹ş·òÂüÊ÷³õÊ¼»¯
 		HuffTree[i].code_len = 0;
 	}
 }
-void Statistics() //¸÷×Ö½ÚÈ¨ÖµÍ³¼Æ
+void Statistics() //å„å­—èŠ‚æƒå€¼ç»Ÿè®¡
 {
-	int code_weight[MaxSize] = { 0 };//¶¨ÒåÈ¨ÖµÊı×é
+	int code_weight[MaxSize] = { 0 };//å®šä¹‰æƒå€¼æ•°ç»„
 	char c;
 	string Filename;
 	Filename = Compress_filename;
-	ifstream inFile(Filename, ios::in | ios::binary); //ÒÔÖ»¶Á´ò¿ª¶ş½øÖÆÎÄ¼ş£»
+	ifstream inFile(Filename, ios::in | ios::binary); //ä»¥åªè¯»æ‰“å¼€äºŒè¿›åˆ¶æ–‡ä»¶ï¼›
 	if (!inFile)
 	{
 		cout << "read error" << endl;
 		return;
 	}
-	while (inFile.read((char *)&c, 1)) //Ò»Ö±¶Áµ½ÎÄ¼ş½áÊø
+	while (inFile.read((char *)&c, 1)) //ä¸€ç›´è¯»åˆ°æ–‡ä»¶ç»“æŸ
 	{
-		code_weight[(unsigned char)c]++;//×Ö½Ú¶ÔÓ¦ÏÂ±êµÄÈ¨Öµ++
+		code_weight[(unsigned char)c]++;//å­—èŠ‚å¯¹åº”ä¸‹æ ‡çš„æƒå€¼++
 		all_bytes_count++;
 	}
-	for (int i = 0; i < MaxSize; i++)//½«ËùÓĞ³öÏÖÔÚÈ¨ÖµÊı×éµÄÖµºÍ¶ÔÓ¦ÏÂ±ê¸³Öµµ½¹ş·òÂüÊı×é
+	for (int i = 0; i < MaxSize; i++)//å°†æ‰€æœ‰å‡ºç°åœ¨æƒå€¼æ•°ç»„çš„å€¼å’Œå¯¹åº”ä¸‹æ ‡èµ‹å€¼åˆ°å“ˆå¤«æ›¼æ•°ç»„
 	{
 		if (code_weight[i] > 0)
 		{
 			HuffTree[bytes_count].weight = code_weight[i];
 			HuffTree[bytes_count].byte = i;
-			bytes_count++;//¶ÁÈëµÄ×Ö½ÚÊı++
+			bytes_count++;//è¯»å…¥çš„å­—èŠ‚æ•°++
 		}
 	}
 
-	inFile.close();//¹Ø±ÕÎÄ¼ş
-	cout << "×Ö½ÚÀàĞÍ×ÜÊı£º" << bytes_count << endl;
-	nodes_count = bytes_count;//¶ÁÈëµÄ×Ö½ÚÊı¸³Öµµ½½áµã×ÜÊı
-	cout << "ÀÛ¼ÆÊäÈë×Ö½Ú£º" << all_bytes_count << endl;
+	inFile.close();//å…³é—­æ–‡ä»¶
+	cout << "å­—èŠ‚ç±»å‹æ€»æ•°ï¼š" << bytes_count << endl;
+	nodes_count = bytes_count;//è¯»å…¥çš„å­—èŠ‚æ•°èµ‹å€¼åˆ°ç»“ç‚¹æ€»æ•°
+	cout << "ç´¯è®¡è¾“å…¥å­—èŠ‚ï¼š" << all_bytes_count << endl;
 
 }
-void CreatHuffTree()//¹¹Ôì¹ş·òÂüÊ÷
+void CreatHuffTree()//æ„é€ å“ˆå¤«æ›¼æ ‘
 {
-	int min1, min2;//Ñ°ÕÒ×îĞ¡Öµmin1ºÍ´Î×îĞ¡Öµmin2
-	for (int i = 0; i < bytes_count - 1; i++)//ºÏ²¢bytes_count-1´Î
+	int min1, min2;//å¯»æ‰¾æœ€å°å€¼min1å’Œæ¬¡æœ€å°å€¼min2
+	for (int i = 0; i < bytes_count - 1; i++)//åˆå¹¶bytes_count-1æ¬¡
 	{
 		min1 = nodes_count - 1;
 		for (int j = nodes_count - 1; j >= 0; j--)
@@ -92,7 +92,7 @@ void CreatHuffTree()//¹¹Ôì¹ş·òÂüÊ÷
 		{
 			if (min2 == -1)
 			{
-				if (HuffTree[j].parent == NULL && j != min1)  //³õÊ¼»¯min2£¬±Ü¿ªmin1 
+				if (HuffTree[j].parent == NULL && j != min1)  //åˆå§‹åŒ–min2ï¼Œé¿å¼€min1 
 					min2 = j;
 			}
 			else
@@ -101,48 +101,48 @@ void CreatHuffTree()//¹¹Ôì¹ş·òÂüÊ÷
 					min2 = j;
 			}
 		}
-		HuffTree[min1].parent = &HuffTree[nodes_count];//ÉèÖÃÖ¸Õë
+		HuffTree[min1].parent = &HuffTree[nodes_count];//è®¾ç½®æŒ‡é’ˆ
 		HuffTree[min2].parent = &HuffTree[nodes_count];
 		HuffTree[nodes_count].leftChild = &HuffTree[min1];
 		HuffTree[nodes_count].rightChild = &HuffTree[min2];
-		HuffTree[nodes_count].weight = HuffTree[min1].weight + HuffTree[min2].weight;//È¨ÖµÀÛ¼Ó
-		nodes_count++;//½áµãÊı++
+		HuffTree[nodes_count].weight = HuffTree[min1].weight + HuffTree[min2].weight;//æƒå€¼ç´¯åŠ 
+		nodes_count++;//ç»“ç‚¹æ•°++
 	}
-	Treeroot = &HuffTree[nodes_count - 1];//¹¹ÔìÊ÷Íê³É£¬µÃµ½¸ù½Úµã
+	Treeroot = &HuffTree[nodes_count - 1];//æ„é€ æ ‘å®Œæˆï¼Œå¾—åˆ°æ ¹èŠ‚ç‚¹
 }
-void CreatHuffCode(HuffNode *pre)//¹¹Ôì¹ş·òÂü±àÂë
+void CreatHuffCode(HuffNode *pre)//æ„é€ å“ˆå¤«æ›¼ç¼–ç 
 {
-	if (pre->leftChild != NULL)//×ó×ß
+	if (pre->leftChild != NULL)//å·¦èµ°
 	{
 		string left = pre->code;
 		left += '0';
 		pre->leftChild->code += left;
-		CreatHuffCode(pre->leftChild);//ÍùÏÂÒ»²ãµİ¹é
+		CreatHuffCode(pre->leftChild);//å¾€ä¸‹ä¸€å±‚é€’å½’
 	}
-	if (pre->rightChild != NULL)//×ó×ß
+	if (pre->rightChild != NULL)//å·¦èµ°
 	{
 		string right = pre->code;
 		right += '1';
 		pre->rightChild->code += right;
-		CreatHuffCode(pre->rightChild);//ÍùÏÂÒ»²ãµİ¹é
+		CreatHuffCode(pre->rightChild);//å¾€ä¸‹ä¸€å±‚é€’å½’
 	}
 	return;
 }
-void Compress()//Ñ¹ËõÎÄ¼ş
+void Compress()//å‹ç¼©æ–‡ä»¶
 {
-	InitHuffTree();//³õÊ¼»¯¹ş·òÂüÊ÷
-	Statistics();//È¨ÖµÍ³¼Æ
-	CreatHuffTree();//¹¹½¨¹ş·òÂüÊ÷
-	CreatHuffCode(Treeroot);//¹¹Ôì¹ş·òÂü±àÂë
-	string Block;//Êä³ö»º³åÇø¿é
-	string Buffer;//Êä³ö»º³å
-	string Codetable[256];//¹ş·òÂü±àÂë±í
+	InitHuffTree();//åˆå§‹åŒ–å“ˆå¤«æ›¼æ ‘
+	Statistics();//æƒå€¼ç»Ÿè®¡
+	CreatHuffTree();//æ„å»ºå“ˆå¤«æ›¼æ ‘
+	CreatHuffCode(Treeroot);//æ„é€ å“ˆå¤«æ›¼ç¼–ç 
+	string Block;//è¾“å‡ºç¼“å†²åŒºå—
+	string Buffer;//è¾“å‡ºç¼“å†²
+	string Codetable[256];//å“ˆå¤«æ›¼ç¼–ç è¡¨
 	int if_Finished = 0;
 	string Filename, Suffix;
 	int mark_Suffix;
-	char c;//Ôİ´æ×Ö·û
-	cout << "½ÚµãÊı£º" << nodes_count << endl;
-	for (int i = Compress_filename.length() - 1; i > 0; i--)//Ñ°ÕÒºó×ºÃûµÄÎ»ÖÃ
+	char c;//æš‚å­˜å­—ç¬¦
+	cout << "èŠ‚ç‚¹æ•°ï¼š" << nodes_count << endl;
+	for (int i = Compress_filename.length() - 1; i > 0; i--)//å¯»æ‰¾åç¼€åçš„ä½ç½®
 	{
 		if (Compress_filename[i] == '.')
 		{
@@ -150,32 +150,32 @@ void Compress()//Ñ¹ËõÎÄ¼ş
 			break;
 		}
 	}
-	Suffix = Compress_filename.substr(mark_Suffix + 1);//ÉèÖÃÎÄ¼şºó×ºÃû
+	Suffix = Compress_filename.substr(mark_Suffix + 1);//è®¾ç½®æ–‡ä»¶åç¼€å
 	Filename = Compress_filename;
-	Filename.erase(mark_Suffix, Compress_filename.length());//ÉèÖÃÎÄ¼şÖ÷Ãû
-	ofstream outFile(Filename, ios::out | ios::binary); //ÒÔĞ´Èë´ò¿ª¶ş½øÖÆÎÄ¼ş£»
+	Filename.erase(mark_Suffix, Compress_filename.length());//è®¾ç½®æ–‡ä»¶ä¸»å
+	ofstream outFile(Filename, ios::out | ios::binary); //ä»¥å†™å…¥æ‰“å¼€äºŒè¿›åˆ¶æ–‡ä»¶ï¼›
 	outFile << Suffix << endl << all_bytes_count << endl << bytes_count << endl;
 	for (int i = 0; i < nodes_count; i++)
 	{
 		if (HuffTree[i].leftChild == NULL)
 		{
-			Codetable[(unsigned char)HuffTree[i].byte] = HuffTree[i].code;//µ¼³öcodeµ½¶ÔÓ¦Âë±í
+			Codetable[(unsigned char)HuffTree[i].byte] = HuffTree[i].code;//å¯¼å‡ºcodeåˆ°å¯¹åº”ç è¡¨
 			outFile << HuffTree[i].byte << endl << HuffTree[i].weight << endl;
 		}
 
 	}
-	ifstream inFile(Compress_filename, ios::in | ios::binary); //ÒÔÖ»¶Á´ò¿ª¶ş½øÖÆÎÄ¼ş£»
-	while (Buffer.length() >= 8 || !if_Finished) //Ò»Ö±¶Áµ½»º´æĞ¡ÓÚ8
+	ifstream inFile(Compress_filename, ios::in | ios::binary); //ä»¥åªè¯»æ‰“å¼€äºŒè¿›åˆ¶æ–‡ä»¶ï¼›
+	while (Buffer.length() >= 8 || !if_Finished) //ä¸€ç›´è¯»åˆ°ç¼“å­˜å°äº8
 	{
-		if (!inFile.read((char *)&c, 1))//¶ÁÈëÒ»¸ö×Ö½Ú£¬ÅĞ¶ÏÊÇ·ñ¶ÁÍê
+		if (!inFile.read((char *)&c, 1))//è¯»å…¥ä¸€ä¸ªå­—èŠ‚ï¼Œåˆ¤æ–­æ˜¯å¦è¯»å®Œ
 		{
 			if_Finished = 1;
 		}
-		if (!if_Finished)//Èç¹ûÎ´¶ÁÍê£¬½«×Ö½Ú¶ÔÓ¦¹ş·òÂü±àÂë´æÈë»º´æÖĞ
+		if (!if_Finished)//å¦‚æœæœªè¯»å®Œï¼Œå°†å­—èŠ‚å¯¹åº”å“ˆå¤«æ›¼ç¼–ç å­˜å…¥ç¼“å­˜ä¸­
 		{
 			Buffer += Codetable[(unsigned char)c];
 		}
-		if (Buffer.length() >= 8)//µ±»º³å´óÓÚµÈÓÚ8Î»Ê±£¬×ª»¯ÎªÒ»¸ö×Ö½Ú´æÈëÊä³ö»º³åÇø¿é
+		if (Buffer.length() >= 8)//å½“ç¼“å†²å¤§äºç­‰äº8ä½æ—¶ï¼Œè½¬åŒ–ä¸ºä¸€ä¸ªå­—èŠ‚å­˜å…¥è¾“å‡ºç¼“å†²åŒºå—
 		{
 			unsigned char ch = 0;
 			for (int i = 0; i < 8; i++)
@@ -184,16 +184,16 @@ void Compress()//Ñ¹ËõÎÄ¼ş
 					ch = ch + pow(2, 7 - i);
 			}
 			Block += ch;
-			Buffer.erase(0, 8);//Çå³ı»º³åÇ°8Î»
+			Buffer.erase(0, 8);//æ¸…é™¤ç¼“å†²å‰8ä½
 		}
-		if (Block.length() >= 32)//µ±Êä³ö»º³åÇø¿é´óÓÚ32¸ö×Ö½ÚÊ±£¬È«²¿Êä³öµ½ÎÄ¼ş
+		if (Block.length() >= 32)//å½“è¾“å‡ºç¼“å†²åŒºå—å¤§äº32ä¸ªå­—èŠ‚æ—¶ï¼Œå…¨éƒ¨è¾“å‡ºåˆ°æ–‡ä»¶
 		{
 			outFile << Block;
 			Block = "";
 		}
 	}
-	outFile << Block;//Êä³öÇø¿éÖĞÊ£Óà×Ö½Ú
-	if (Buffer.length() < 8)//Èô»º³å²»¹»8Î»£¬²¹×ã0
+	outFile << Block;//è¾“å‡ºåŒºå—ä¸­å‰©ä½™å­—èŠ‚
+	if (Buffer.length() < 8)//è‹¥ç¼“å†²ä¸å¤Ÿ8ä½ï¼Œè¡¥è¶³0
 	{
 		int limit = 8 - Buffer.length();
 		for (int i = 0; i < limit; i++)
@@ -210,20 +210,20 @@ void Compress()//Ñ¹ËõÎÄ¼ş
 		Buffer = "";
 	}
 	outFile.close();
-	inFile.close();//¹Ø±ÕÎÄ¼ş
-	ifstream inFilesize(Filename, ios::out | ios::binary); //¼ÆËãÑ¹ËõºóÎÄ¼ş´óĞ¡ºÍÑ¹Ëõ±È
+	inFile.close();//å…³é—­æ–‡ä»¶
+	ifstream inFilesize(Filename, ios::out | ios::binary); //è®¡ç®—å‹ç¼©åæ–‡ä»¶å¤§å°å’Œå‹ç¼©æ¯”
 	inFilesize.seekg(0, ios_base::end);
 	int compress_Size = inFilesize.tellg();
-	cout << "Ñ¹ËõºóÎÄ¼ş´óĞ¡:" << compress_Size << endl;
+	cout << "å‹ç¼©åæ–‡ä»¶å¤§å°:" << compress_Size << endl;
 	inFilesize.close();
 	double compress_Ratio = (double)compress_Size / all_bytes_count;
-	cout << "Ñ¹Ëõ±È£º";
+	cout << "å‹ç¼©æ¯”ï¼š";
 	printf("%.2lf%%\n", compress_Ratio * 100);
-	cout << "Ñ¹ËõÍê±Ï";
+	cout << "å‹ç¼©å®Œæ¯•";
 }
 void Decompress()
 {
-	InitHuffTree();//³õÊ¼»¯¹ş·òÂüÊ÷
+	InitHuffTree();//åˆå§‹åŒ–å“ˆå¤«æ›¼æ ‘
 	unsigned int i = 0;
 	unsigned char c;
 	char t;
@@ -233,50 +233,50 @@ void Decompress()
 	int current_code, current_weight, byte_read_count = 0, if_byte = 1;
 	int    Byte_count = 0, Byte_type_count = -1;//headmessage
 	string Codestream, Filename, Suffix;
-	int buffer[8];//»º³å
+	int buffer[8];//ç¼“å†²
 	HuffNode *Node_Point;
 
 	Filename = Decompress_filename;
 	Suffix = Decompress_suffix;
-	ifstream inFilesize(Filename, ios::out | ios::binary); //¼ÆËãÔ´ÎÄ¼ş´óĞ¡
+	ifstream inFilesize(Filename, ios::out | ios::binary); //è®¡ç®—æºæ–‡ä»¶å¤§å°
 	inFilesize.seekg(0, ios_base::end);
 	int compress_Size = inFilesize.tellg();
-	inFilesize.close();//¼ÆËãÍê±Ï
-	cout << "Ô´ÎÄ¼ş´óĞ¡:" << compress_Size << endl;
-	ifstream inFile(Filename, ios::in | ios::binary); //ÒÔÖ»¶Á´ò¿ª¶ş½øÖÆÎÄ¼ş£»
-	inFile  >> Suffix >> Byte_count >> Byte_type_count;//¶ÁÈ¡Í·²¿ĞÅÏ¢
-	cout << "×Ö½ÚÀàĞÍÊı:" << Byte_type_count << endl;
-	inFile.read((char*)&t, 1);//¶Áµô»»ĞĞ·û
-	while (inFile.read((char *)&c, 1)) //¶ÁÈ¡¹ş·òÂü±àÂë±í
+	inFilesize.close();//è®¡ç®—å®Œæ¯•
+	cout << "æºæ–‡ä»¶å¤§å°:" << compress_Size << endl;
+	ifstream inFile(Filename, ios::in | ios::binary); //ä»¥åªè¯»æ‰“å¼€äºŒè¿›åˆ¶æ–‡ä»¶ï¼›
+	inFile  >> Suffix >> Byte_count >> Byte_type_count;//è¯»å–å¤´éƒ¨ä¿¡æ¯
+	cout << "å­—èŠ‚ç±»å‹æ•°:" << Byte_type_count << endl;
+	inFile.read((char*)&t, 1);//è¯»æ‰æ¢è¡Œç¬¦
+	while (inFile.read((char *)&c, 1)) //è¯»å–å“ˆå¤«æ›¼ç¼–ç è¡¨
 	{
-		if (if_byte == 1)//Èç¹ûÎª¶ÔÓ¦×Ö½Ú
+		if (if_byte == 1)//å¦‚æœä¸ºå¯¹åº”å­—èŠ‚
 		{
 			current_code = c;
 			if_byte = 0;
 		}
-		else if (if_byte == 0)//×Ö½Ú¶ÔÓ¦È¨Öµ
+		else if (if_byte == 0)//å­—èŠ‚å¯¹åº”æƒå€¼
 		{
 			inFile >> current_weight;
-			HuffTree[byte_read_count].weight = current_weight;//°Ñ¶ÔÓ¦×Ö½ÚºÍÈ¨Öµ¸³Öµµ½¹ş·òÂüÊ÷
+			HuffTree[byte_read_count].weight = current_weight;//æŠŠå¯¹åº”å­—èŠ‚å’Œæƒå€¼èµ‹å€¼åˆ°å“ˆå¤«æ›¼æ ‘
 			HuffTree[byte_read_count].byte = current_code;
 			if_byte = 1;
-			byte_read_count++; //×Ö½ÚÀàĞÍÍ³¼Æ++
-			inFile.read((char*)&t, 1);//¶Áµô»»ĞĞ·û
+			byte_read_count++; //å­—èŠ‚ç±»å‹ç»Ÿè®¡++
+			inFile.read((char*)&t, 1);//è¯»æ‰æ¢è¡Œç¬¦
 		}
-		if (byte_read_count == Byte_type_count)//Èç¹û¶ÁÍê¾ÍÌø³ö
+		if (byte_read_count == Byte_type_count)//å¦‚æœè¯»å®Œå°±è·³å‡º
 		{
 			break;
 		}
 	}
-	bytes_count = nodes_count = Byte_type_count;//ÉèÖÃ×Ö½ÚÊı£¬½áµã×ÜÊı
-	CreatHuffTree();//¹¹Ôì¹ş·òÂüÊ÷
-	CreatHuffCode(Treeroot);//¹¹Ôì¹ş·òÂü±àÂë
-	Node_Point = Treeroot;//µ±Ç°×´Ì¬Ö¸Ïò¸ù½Úµã
+	bytes_count = nodes_count = Byte_type_count;//è®¾ç½®å­—èŠ‚æ•°ï¼Œç»“ç‚¹æ€»æ•°
+	CreatHuffTree();//æ„é€ å“ˆå¤«æ›¼æ ‘
+	CreatHuffCode(Treeroot);//æ„é€ å“ˆå¤«æ›¼ç¼–ç 
+	Node_Point = Treeroot;//å½“å‰çŠ¶æ€æŒ‡å‘æ ¹èŠ‚ç‚¹
 	Filename += ".";
-	Filename += Suffix;//»¹Ô­ÎÄ¼şÃû
-	ofstream outFile(Filename, ios::out | ios::binary); //ÒÔĞ´Èë´ò¿ª¶ş½øÖÆÎÄ¼ş£»
-	cout << "Êä³öÎÄ¼şÃû:" << Filename << endl;
-	while (btye_write_count != Byte_count) //Ò»Ö±¶Áµ½ËùÓĞ×Ö½ÚÊä³öÍê±Ï
+	Filename += Suffix;//è¿˜åŸæ–‡ä»¶å
+	ofstream outFile(Filename, ios::out | ios::binary); //ä»¥å†™å…¥æ‰“å¼€äºŒè¿›åˆ¶æ–‡ä»¶ï¼›
+	cout << "è¾“å‡ºæ–‡ä»¶å:" << Filename << endl;
+	while (btye_write_count != Byte_count) //ä¸€ç›´è¯»åˆ°æ‰€æœ‰å­—èŠ‚è¾“å‡ºå®Œæ¯•
 	{
 		inFile.read((char *)&c, 1);
 		for (int j = 7; j >= 0; j--)
@@ -286,58 +286,58 @@ void Decompress()
 		}
 		for (i = 0; i < 8; i++)
 		{
-			if (btye_write_count == Byte_count)//ËùÓĞ×Ö½ÚÊä³öÍê³É£¬Ìø³ö
+			if (btye_write_count == Byte_count)//æ‰€æœ‰å­—èŠ‚è¾“å‡ºå®Œæˆï¼Œè·³å‡º
 			{
 				break;
 			}
 			Go_finished = 0;
 			while (Go_finished == 0)
 			{
-				if (buffer[i] == 0)//×ó×ß
+				if (buffer[i] == 0)//å·¦èµ°
 				{
-					if (Node_Point->leftChild != NULL)//ÓĞ×óº¢×Ó
+					if (Node_Point->leftChild != NULL)//æœ‰å·¦å­©å­
 					{
 						Node_Point = Node_Point->leftChild;
-						Go_finished = 1;//±ê¼ÇÎªÒÑ×ß
+						Go_finished = 1;//æ ‡è®°ä¸ºå·²èµ°
 					}
-					else//µ±Ç°ÎªÒ¶×Ó
+					else//å½“å‰ä¸ºå¶å­
 					{
 						outFile << Node_Point->byte;
-						Node_Point = Treeroot;//·µ»Ø¸ù
+						Node_Point = Treeroot;//è¿”å›æ ¹
 						btye_write_count++;
 					}
 				}
-				else//ÓÒ×ß
+				else//å³èµ°
 				{
-					if (Node_Point->rightChild != NULL)//ÓĞÓÒº¢×Ó
+					if (Node_Point->rightChild != NULL)//æœ‰å³å­©å­
 					{
 						Node_Point = Node_Point->rightChild;
-						Go_finished = 1;//±ê¼ÇÎªÒÑ×ß
+						Go_finished = 1;//æ ‡è®°ä¸ºå·²èµ°
 					}
-					else//µ±Ç°ÎªÒ¶×Ó
+					else//å½“å‰ä¸ºå¶å­
 					{
 						outFile << Node_Point->byte;
-						Node_Point = Treeroot;//·µ»Ø¸ù
+						Node_Point = Treeroot;//è¿”å›æ ¹
 						btye_write_count++;
 					}
 				}
 			}
 		}
 	}
-	cout << "½âÑ¹Íê±Ï" << endl;
+	cout << "è§£å‹å®Œæ¯•" << endl;
 	inFile.close();
 	outFile.close();
 }
 void Callwindow()
 {
 	char c;
-	cout << "1.Ñ¹Ëõ" << endl;
-	cout << "2.½âÑ¹" << endl;
+	cout << "1.å‹ç¼©" << endl;
+	cout << "2.è§£å‹" << endl;
 	c = getchar();
 	if (c == '1')
 	{
 		system("cls");
-		cout << "ÇëÊäÈëĞèÒªÑ¹ËõµÄÎÄ¼şÃû£º" << endl;
+		cout << "è¯·è¾“å…¥éœ€è¦å‹ç¼©çš„æ–‡ä»¶åï¼š" << endl;
 		cin >> Compress_filename;
 		Compress();
 		return;
@@ -345,7 +345,7 @@ void Callwindow()
 	else if (c == '2')
 	{
 		system("cls");
-		cout << "ÇëÊäÈëĞèÒª½âÑ¹µÄÎÄ¼şÃû£º" << endl;
+		cout << "è¯·è¾“å…¥éœ€è¦è§£å‹çš„æ–‡ä»¶åï¼š" << endl;
 		cin >> Decompress_filename;
 		Decompress();
 		return;
@@ -353,7 +353,7 @@ void Callwindow()
 	else
 	{
 		system("cls");
-		cout << "ÊäÈëÓĞÎó" << endl;
+		cout << "è¾“å…¥æœ‰è¯¯" << endl;
 		return;
 	}
 }
